@@ -1,0 +1,5 @@
+# abrir o arquivo binário e armazenar na memoria_texto (eu acho?)
+# armazenar em PC o endereço da próxima instrução a ser executada
+# armazenar em IR a instrução que será executada
+# decodificar a instrução armazenada em IR (as outras já não sei como fazer, aqui eu sei ainda menos)
+# executar instrução

@@ -1,17 +1,14 @@
 # Projeto: Simulador do processador MIPS
 # Arquivo: simulador.asm
 # Descrição:
-# Autores: Maria Rita Piekas Nathália Zófoli
+# Autores: Maria Rita Piekas e Nathália Zófoli
 # data da criação: 09/04/2024
 
 .text
-# instruções
-# carregar arquivo binário na memória
-# enquanto não terminaram as instruções
-# (1) ler uma instrução
-# (2) decodificar a instrução 
-# (3) executar
-# terminar o programa
+## busca_instrucao: seta os valores de PC e IR para serem executados
+busca_instrucao:
+		
+
 
 .data
 # dados do simulador

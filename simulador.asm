@@ -7,7 +7,13 @@
 .text
 ## busca_instrucao: seta os valores de PC e IR para serem executados
 busca_instrucao:
-		
+	la $t0, PC     		## carrega endereço de PC para $t0
+	lw $s0, 0($t0) 		##  carrega o valor de PC para $s0
+	sw $s0, IR     		## armazena no IR o valor de PC
+	addi $t0, $s0, 4 	## soma 4 ao endereço de PC
+	sw $t0, PC		## armazena o resultado em PC
+	
+	
 
 
 .data

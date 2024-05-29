@@ -1,13 +1,14 @@
-# abrir o arquivo binário e armazenar na memoria_texto
+# abrir o arquivo binário e armazenar na memoria_texto ✅️
 BUSCAR A INSTRUÇÃO
 # armazenar em PC o endereço da próxima instrução a ser executada
 # armazenar em IR a instrução que será executada
 DECODIFICAR A INSTRUÇÃO
 # separa a instrução em opcode, rs, rt, rd, shamt, funct
-# identifica se é uma instrução tipo R, I ou J (tô em dúvida se REALMENTE precisa dessa etapa)
+# identifica se é uma instrução tipo R, I ou J (tô em dúvida se REALMENTE precisa dessa etapa) (PRECISA)
+# Incrementar aqui o valor de PC
 EXECUTAR A INSTRUÇÃO
 # fazer os procedimentos que simulam as instruções do Assembly
-# chamar cada instrução dependendo do opcode
+# chamar cada instrução dependendo do opcode (switch-case)
 # Instruções que precisam ser simuladas:
   1. addiu
   2. add

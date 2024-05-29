@@ -6,55 +6,50 @@
 
 .text
 ##############################################
-leituraArquivo:
+aberturaArquivo:
 ##############################################
-	li $v0, 13 		# descritor para a abertura de arquivo com syscall
-	la $a0, local_arquivo 	# carrega o nome do arquivo em $a0
-	li $a1, 0 		# 0 = abre o arquivo em modo de leitura
-	syscall
+	la $a0, local_arquivo 	  # carrega o endereço do arquivo em $a0
+	li $a1, 0 		  # seta a flag do arquivo em 0 para modo de leitura
+	la $a0, local_arquivo 	  # carrega o nome do arquivo em $a0
+	li $v0, 13 		  # 0 = abre o arquivo em modo de leitura
+	syscall			  # faz a chamada de sistema n. 13 para abrir o arquivo
+	la $t0, descritor_arquivo # armazena em $t0 o endereço do descritor do arquivo
+	sw $v0, 0($t0)		  # armazena em descritor_arquivo o valor de retorno da chamada	
 
-	move $s0, $v0 		## copia o descritor do arquivo de $v0 para $s0
+## Testa a abertura do arquivo:
+	add $t1, $zero, $t0	 # armazena em $t1 o valor de retorno da chamada 
+	bltz $t1, encerraPrograma # se o retorno da chamada for negativo, houve erro na abertura do arquivo
 	
-	move $a0, $s0
-	li $v0, 14 		# descritor para a leitura do arquivo
-	la $a1, memoria_text 	# armazena o conteúdo na nossa memória
-	li $a2, 1024 		# valor do espaço em memoria_text
+LeituraArquivo:	
+	lw $a0, 0($t0)		# armazena o valor do descritor do arquivo em $a0 
+	la $a1, buffer_leitura  # carrega em $a1 o endereço da variável buffer_leitura
+	li $a2, 4		# carrega em $a2 o número de bytes que serão lidos do arquivo
+	li $v0, 14		# carrega em $v0 a chamada que será feita ao sistema (14 = leitura arquivo)
 	syscall
 	
-	li $v0, 4
-	move $a0, $a1
-	syscall
+## Armazena o valor de buffer_leitura para memoria_text e incrementa o endereço de memoria_text
+	la $a2, memoria_text	# carrega o endereço da variável memoria_text em $a2
+	lw $a3, 0($a1) 		# carrega o valor contido no buffer_leitura em $a3
+	sw $a3, 0($a2)		# armazena o valor do buffer (tá em $a1) para o endereço de memoria_text
+				## INSERIR UMA VARIÁVEL QUE INCREMENTE O ENDEREÇO DA MEMÓRIA?
 	
-	li $v0, 16
-	move $a0, $s0
-	syscall
+encerraPrograma:
+	li $v0, 17
+	syscall			# faz a chamada 17 e encerra o programa
+		
 	
-	
-# instruções
-# carregar arquivo binário na memória
-# enquanto não terminaram as instruções
-# (1) ler uma instrução
-# (2) decodificar a instrução 
-# (3) executar
-# terminar o programa
-
 .data
-# dados do simulador
-# variável memória ou variáveis
-# segmento de código
-# segmento de dados
-# segmentos da pilha
-# registradores
-# campos da instrução
 	PC: .word 0
 	IR: .word 0
-	regs: .space 128
+	regs: .space 128 ## Registradores do simulador
+	buffer_leitura: .space 4  ## Buffer para leitura do arquivo de entrada. Armazena 4 bytes por vez
 	memoria_text: .space 1024
 	memoria_data: .space 1024
 	memoria_pilha: .space 1024
-	endereco_texto: .word 0x0040000000
+	endereco_texto: .word 0x00400000
 	endereco_data: .word 0x10010000
 	endereco_pilha: .word 0x7FFFEFFC
-	local_arquivo: .asciiz "trabalho_01-2024_1.bin"
+	local_arquivo: .asciiz "/home/nathizofoli/Documentos/workspace/T1-org/trabalho_01-2024_1.bin"
+	descritor_arquivo: .word 0
 
 

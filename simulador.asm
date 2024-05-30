@@ -5,7 +5,6 @@
 # data da criação: 09/04/2024
 
 .text
-<<<<<<< HEAD
 ##############################################
 aberturaArquivo:
 	la $a0, local_arquivo 	  # carrega o endereço do arquivo em $a0
@@ -15,7 +14,7 @@ aberturaArquivo:
 	syscall			  # faz a chamada de sistema n. 13 para abrir o arquivo
 	la $t0, descritor_arquivo # armazena em $t0 o endereço do descritor do arquivo
 	sw $v0, 0($t0)		  # armazena em descritor_arquivo o valor de retorno da chamada	
-=======
+
 
 ## Testa a abertura do arquivo:
 	add $t1, $zero, $t0	 # armazena em $t1 o valor de retorno da chamada 

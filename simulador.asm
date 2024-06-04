@@ -58,10 +58,9 @@ busca_instrucao:
 	
 	## Atualiza o PC para apontar para a próxima instrução
 	addi $a1, $a1, 4
-	sw $a1, 0($a0)
+	sw $a1, 0($a0) ## armazena o valor incrementado em PC
 	
-	## addi $t0, $s0, 4 	## soma 4 ao endereço de PC
-	## sw $t0, PC		## armazena o resultado em PC
+	bnez $a2, busca_instrucao ## loop pra testar que está percorrendo memoria_text
 	
 ##############################################
 encerraPrograma:

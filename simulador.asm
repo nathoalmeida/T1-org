@@ -3,7 +3,6 @@
 # Descrição:
 # Autores: Maria Rita Piekas e Nathália Zófoli
 # data da criação: 09/04/2024
-
 .text
 ##############################################
 aberturaArquivo:
@@ -42,13 +41,34 @@ leituraArquivo:
 fechaArquivo:
 	li $v0, 16
 	syscall
-
+	
+## Carrega em PC o endereço inicial de memoria_text
+	la $a0, PC ## carrega endereço texto
+	li $a1, 0x1001008c	## carrega o valor do endereço inicial de memoria_text pra $a1
+	sw $a1, 0($a0)		## armazena em PC o valor de $a1
+	
+## busca_instrucao: seta os valores de PC e IR para serem executados
+busca_instrucao:
+	la $a0, PC	## carrega endereço de PC em $a0	
+	lw $a1, 0($a0)	## carrega o valor de PC em $a1
+	lw $a2, 0($a1)	## carrega o valor armazenado no endereço de PC
+	
+	la $a3, IR	## carrega o endereço de IR em $a3
+	sw $a2, 0($a3)	## armazena a instrução na variável IR
+	
+	## Atualiza o PC para apontar para a próxima instrução
+	addi $a1, $a1, 4
+	sw $a1, 0($a0)
+	
+	## addi $t0, $s0, 4 	## soma 4 ao endereço de PC
+	## sw $t0, PC		## armazena o resultado em PC
+	
 ##############################################
 encerraPrograma:
 	li $v0, 17
-	syscall			# faz a chamada 17 e encerra o programa
-		
-	
+	syscall			# faz a chamada 17 e encerra o programa	
+
+
 .data
 	PC: .word 0
 	IR: .word 0
@@ -62,9 +82,3 @@ encerraPrograma:
 	endereco_pilha: .word 0x7FFFEFFC
 	local_arquivo: .asciiz "/home/nathizofoli/Documentos/workspace/T1-org/trabalho_01-2024_1.bin"
 	descritor_arquivo: .word 0
-
-
-## mapa dos registradores ##
-## endereço inicial: 0x10010008
-
-

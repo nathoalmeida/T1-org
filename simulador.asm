@@ -64,14 +64,42 @@ buscaInstrucao:
 	
 decodificaInstrucao: 
 	lw $a0, IR
-	srl $t0, $a0, 26 ## extrai o campo OPCODE e armazena em $t0
-	#andi $t1, $a0, 0x0000003F   # $t1 = campo FUNCT (000000 00000 00000 00000 00000 111111)
-	#srl $t2, $a0, 16                            # iii) $t2 = campo RT (deslocado para início)
-    	#andi $t2, $t2, 0x0000002F                   #      $t2 = campo RT (isolado por uma máscara)
+	srl $t0, $a0, 26 		## $t0 = campo OPCODE
+	andi $t1, $a0, 0x0000003F 	## $t1 = campo FUNCT
+	srl $t2, $a0, 6 		## $t2 = campo shamt
+	andi $t2, $t2, 0x0000001F
+	srl $t3, $a0, 11 		## $t3 = campo rd
+	andi $t3, $t3, 0x0000001F
+	srl $t4, $a0, 16 		## $t4 = campo rt
+	andi $t4, $t4, 0x0000001F
+	srl $t5, $a0, 21 		## $t5 = campo rs
+	andi $t5, $t5, 0x0000001F
+	sll $t6, $t5, 1
+
+	## testa os valores de opcode e direciona para instrução tipo R/I/J
+	beq $t0, $zero, instrucaoR
+	li $t7, 2		
+	beq $t0, $t7, instrucaoJ
+	li $t7, 3		
+	beq $t0, $t7, instrucaoJ
+	li $t7, 4		 ### ?????????
+	beq $t0, $t7, instrucaoJ ### ?????????
+	li $t7, 8		
+	beq $t0, $t7, instrucaoI
+	li $t7, 9		
+	beq $t0, $t7, instrucaoI
 	
+	beq $t0, $t7, instrucaoJ
+	
+instrucaoR:
+	li $t7, 0x20
 	
 
-fimDecodificaInstrucao:
+instrucaoI:
+
+instrucaoJ:	
+
+#fimDecodificaInstrucao:
 	
 	
 	

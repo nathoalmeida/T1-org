@@ -48,7 +48,7 @@ fechaArquivo:
 	sw $a1, 0($a0)		## armazena em PC o valor de $a1
 	
 ## busca_instrucao: seta os valores de PC e IR para serem executados
-busca_instrucao:
+buscaInstrucao:
 	la $a0, PC	## carrega endereço de PC em $a0	
 	lw $a1, 0($a0)	## carrega o valor de PC em $a1
 	lw $a2, 0($a1)	## carrega o valor armazenado no endereço de PC
@@ -60,7 +60,48 @@ busca_instrucao:
 	addi $a1, $a1, 4
 	sw $a1, 0($a0) ## armazena o valor incrementado em PC
 	
-	bnez $a2, busca_instrucao ## loop pra testar que está percorrendo memoria_text
+	## bnez $a2, busca_instrucao ## loop pra testar que está percorrendo memoria_text
+	
+decodificaInstrucao: 
+	lw $a0, IR
+	srl $t0, $a0, 26 		## $t0 = campo OPCODE
+	andi $t1, $a0, 0x0000003F 	## $t1 = campo FUNCT
+	srl $t2, $a0, 6 		## $t2 = campo shamt
+	andi $t2, $t2, 0x0000001F
+	srl $t3, $a0, 11 		## $t3 = campo rd
+	andi $t3, $t3, 0x0000001F
+	srl $t4, $a0, 16 		## $t4 = campo rt
+	andi $t4, $t4, 0x0000001F
+	srl $t5, $a0, 21 		## $t5 = campo rs
+	andi $t5, $t5, 0x0000001F
+	sll $t6, $t5, 1
+
+	## testa os valores de opcode e direciona para instrução tipo R/I/J
+	beq $t0, $zero, instrucaoR
+	li $t7, 2		
+	beq $t0, $t7, instrucaoJ
+	li $t7, 3		
+	beq $t0, $t7, instrucaoJ
+	li $t7, 4		 ### ?????????
+	beq $t0, $t7, instrucaoJ ### ?????????
+	li $t7, 8		
+	beq $t0, $t7, instrucaoI
+	li $t7, 9		
+	beq $t0, $t7, instrucaoI
+	
+	beq $t0, $t7, instrucaoJ
+	
+instrucaoR:
+	li $t7, 0x20
+	
+
+instrucaoI:
+
+instrucaoJ:	
+
+#fimDecodificaInstrucao:
+	
+	
 	
 ##############################################
 encerraPrograma:
@@ -81,3 +122,8 @@ encerraPrograma:
 	endereco_pilha: .word 0x7FFFEFFC
 	local_arquivo: .asciiz "/home/nathizofoli/Documentos/workspace/T1-org/trabalho_01-2024_1.bin"
 	descritor_arquivo: .word 0
+# Máscaras para decodificar a instrução
+	#campo_rd:
+	#campo_rs:
+	#campo_rt:
+	#campo_imm:

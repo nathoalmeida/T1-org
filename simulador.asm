@@ -48,7 +48,7 @@ fechaArquivo:
 	sw $a1, 0($a0)		## armazena em PC o valor de $a1
 	
 ## busca_instrucao: seta os valores de PC e IR para serem executados
-busca_instrucao:
+buscaInstrucao:
 	la $a0, PC	## carrega endereço de PC em $a0	
 	lw $a1, 0($a0)	## carrega o valor de PC em $a1
 	lw $a2, 0($a1)	## carrega o valor armazenado no endereço de PC
@@ -60,7 +60,20 @@ busca_instrucao:
 	addi $a1, $a1, 4
 	sw $a1, 0($a0) ## armazena o valor incrementado em PC
 	
-	bnez $a2, busca_instrucao ## loop pra testar que está percorrendo memoria_text
+	## bnez $a2, busca_instrucao ## loop pra testar que está percorrendo memoria_text
+	
+decodificaInstrucao: 
+	lw $a0, IR
+	srl $t0, $a0, 26 ## extrai o campo OPCODE e armazena em $t0
+	#andi $t1, $a0, 0x0000003F   # $t1 = campo FUNCT (000000 00000 00000 00000 00000 111111)
+	#srl $t2, $a0, 16                            # iii) $t2 = campo RT (deslocado para início)
+    	#andi $t2, $t2, 0x0000002F                   #      $t2 = campo RT (isolado por uma máscara)
+	
+	
+
+fimDecodificaInstrucao:
+	
+	
 	
 ##############################################
 encerraPrograma:
@@ -81,3 +94,8 @@ encerraPrograma:
 	endereco_pilha: .word 0x7FFFEFFC
 	local_arquivo: .asciiz "/home/nathizofoli/Documentos/workspace/T1-org/trabalho_01-2024_1.bin"
 	descritor_arquivo: .word 0
+# Máscaras para decodificar a instrução
+	#campo_rd:
+	#campo_rs:
+	#campo_rt:
+	#campo_imm:

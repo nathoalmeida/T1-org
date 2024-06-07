@@ -10,17 +10,17 @@ EXECUTAR A INSTRUÇÃO
 # fazer os procedimentos que simulam as instruções do Assembly
 # chamar cada instrução dependendo do opcode (switch-case)
 # Instruções que precisam ser simuladas:
-  1. addiu
-  2. add
-  3. addi
-  4. addu
-  5. sw
-  6. la
-  7. lw
-  8. move
-  9. bne
-  10. mul
-  11. jal
-  12. j
-  13. jr
-  14. syscall
+  1. addiu (opcode 9)
+  2. add (opcode 0 func 0x20)
+  3. addi (opcode 8)
+  4. addu (opcode 0 func 0x21)
+  5. sw (opcode 0x2B func 0x20)
+  6. la ???
+  7. lw (opcode 0x23)
+  8. move (opcode ?????
+  9. bne (opcode 5
+  10. mul ((opcode 0 func 0x18)
+  11. jal (opcode 3)
+  12. j (opcode 2)
+  13. jr (opcode 0 func 8)
+  14. syscall (opcode 0 func 0xc)

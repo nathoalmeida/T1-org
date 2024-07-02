@@ -61,20 +61,20 @@ buscaInstrucao:
 	sw $a1, 0($a0) ## armazena o valor incrementado em PC
 	
 	## bnez $a2, busca_instrucao ## loop pra testar que está percorrendo memoria_text
-	
+ 	
 decodificaInstrucao: 
 	lw $a0, IR
-	srl $t0, $a0, 26 		## $t0 = campo OPCODE
-	andi $t1, $a0, 0x0000003F 	## $t1 = campo FUNCT
-	srl $t2, $a0, 6 		## $t2 = campo shamt
-	andi $t2, $t2, 0x0000001F
-	srl $t3, $a0, 11 		## $t3 = campo rd
-	andi $t3, $t3, 0x0000001F
-	srl $t4, $a0, 16 		## $t4 = campo rt
-	andi $t4, $t4, 0x0000001F
-	srl $t5, $a0, 21 		## $t5 = campo rs
-	andi $t5, $t5, 0x0000001F
-	sll $t6, $t5, 1
+	srl $s0, $a0, 26 		## $s0 = campo OPCODE
+	andi $s1, $a0, 0x0000003F 	## $s1 = campo FUNCT
+	srl $s2, $a0, 6 		## $s2 = campo shamt
+	andi $s2, $s2, 0x0000001F
+	srl $s3, $a0, 11 		## $s3 = campo rd
+	andi $s3, $s3, 0x0000001F
+	srl $s4, $a0, 16 		## $s4 = campo rt
+	andi $s4, $s4, 0x0000001F
+	srl $s5, $a0, 21 		## $s5 = campo rs
+	andi $s5, $s5, 0x0000001F
+	sll $s6, $s5, 1
 
 	## testa os valores de opcode e direciona para instrução tipo R/I/J
 	beq $t0, $zero, instrucaoR
@@ -91,18 +91,110 @@ decodificaInstrucao:
 	
 	beq $t0, $t7, instrucaoJ
 	
+	
 instrucaoR:
-	li $t7, 0x20
+	###
 	
 
 instrucaoI:
+	sll $t0, $s3, 11 ## desloca campo rd 11 bits para esquerda
+	sll $t1, $s2, 6 ## desloca campo shamt 6 bits para esquerda
+	add $t2, $t1, $t0 ## soma shamt+rd
+	add $t2, $t2, $s1 ## soma shamt+rd+funct
+	sw $t2, 0($s1)
 
-instrucaoJ:	
+instrucaoJ:
+	sll $t0, $s5, 21  ## desloca campo rs 16 bits para esquerda
+	sll $t1, $s4, 16  ## desloca campo rt 16 bits para esquerda
+	sll $t2, $s3, 11  ## desloca campo rd 11 bits para esquerda
+	sll $t3, $s2, 6   ## desloca campo shamt 6 bits para esquerda
+	add $t4, $t0, $t1 ## $t4 -> rs+rt
+	add $t5, $t2, $t3 ## $t5 -> rd+shamt
+	add $t4, $t4, $t5 ## $t4 + $t5
+	sw  $t4, 0($s1)	  ## $s1 -> campo address
 
-#fimDecodificaInstrucao:
+#fimDecodificaInstrucao
+
+executaInstrucao:
+## ADD
+instADD: 
+#rd = rs + rt
+        ## rs
+	la $t0, regs      ## endereço inicial dos registradores
+	sll $t1, $s5, 2   ## 4 * n. do registrador rs
+	add $t1, $t1, $t0 ## endereço inicial de regs + 4 * n. do registrador
+	lw $t2, 0($t1)    ## $t2 = valor armazenado em regs[rs]
+	## rt
+	sll $t1, $s4, 2   ## 4 * n. do registrador rt
+	add $t1, $t1, $t0 ## endereço inicial de regs + 4 * n. do registrador
+	lw $t3, 0($t1)    ## $t3 = valor armazenado em regs[rt]
+	## rd
+	sll $t1, $s3, 2   ## 4 * n. do registrador de destino (rd)
+	add $t1, $t1, $t0 ## $t1 -> endereço do registrador rd
+	add $t4, $t3, $t2 ## $t4 = rs+rt
+	sw  $t4, 0($t1)
+	j fimExecutaInstrucao
 	
+## ADDU	
+instADDU:
+#rd = rs + rt (sem sinal)
+        ## rs
+	la $t0, regs      ## endereço inicial dos registradores
+	sll $t1, $s5, 2   ## 4 * n. do registrador rs
+	add $t1, $t1, $t0 ## endereço inicial de regs + 4 * n. do registrador
+	lw $t2, 0($t1)    ## $t2 = valor armazenado em regs[rs]
+	## rt
+	sll $t1, $s4, 2   ## 4 * n. do registrador rt
+	add $t1, $t1, $t0 ## endereço inicial de regs + 4 * n. do registrador
+	lw $t3, 0($t1)    ## $t3 = valor armazenado em regs[rt]
+	## rd
+	sll $t1, $s3, 2   ## 4 * n. do registrador de destino (rd)
+	add $t1, $t1, $t0 ## $t1 -> endereço do registrador rd
+	add $t4, $t3, $t2 ## $t4 = rs+rt
+	sw  $t4, 0($t1)
+	j fimExecutaInstrucao
+
+## ADDIU	
+instADDIU:
+	la $t0, regs      ## endereço inicial dos registradores
+	lw $t1, 0($s1)	  ## valor Imm armazenado
+	sll $t2, $s5, 2	  ## 4 * valor armazenado em rs
+	add $t3, $t2, $t0 ## endereço do registrador rs
+	lw $t2, 0($t3)    ## $t2 -> valor armazenado em rs
+	add $t2, $t2, $t1 ## rs+imm
+	## rt
+	sll $t1, $s4, 2	  ## 4 * valor armazenado em rt
+	add $t3, $t1, $t0 ## $t3 -> endereço do registrador rt
+	sw $t2, 0($t3)    ## registrador rt = rs +imm 
+	j fimExecutaInstrucao
 	
+## ADDI	
+instADDI:
+	la $t0, regs      ## endereço inicial dos registradores
+	lw $t1, 0($s1)	  ## valor Imm armazenado
+	sll $t2, $s5, 2	  ## 4 * valor armazenado em rs
+	add $t3, $t2, $t0 ## endereço do registrador rs
+	lw $t2, 0($t3)    ## $t2 -> valor armazenado em rs
+	add $t2, $t2, $t1 ## rs+imm
+	## rt
+	sll $t1, $s4, 2	  ## 4 * valor armazenado em rt
+	add $t3, $t1, $t0 ## $t3 -> endereço do registrador rt
+	sw $t2, 0($t3)    ## registrador rt = rs +imm 
+	j fimExecutaInstrucao
 	
+## SW
+instSW:
+	la $t0, regs      ## endereço inicial dos registradores
+	sll $t1, $s4, 2	  ## $t1 -> valor do campo rt * 4
+	add $t1, $t1, $t0 ## $t1 -> endereço efetivo do registrador rt
+	sll $t2, $s5, 2   ## $t2 -> valor do campo rs * 4
+	add $t2, $t2, $t0 ## $t2 -> endereço efetivo do registrador rs
+	## acessar o valor do rt e armazenar no endereço de rs+imm
+	lw $t3, 0($s1)    ## $t3 -> valor do campo immediate
+		
+	 
+fimExecutaInstrucao:
+	j buscaInstrucao
 ##############################################
 encerraPrograma:
 	li $v0, 17
@@ -122,8 +214,22 @@ encerraPrograma:
 	endereco_pilha: .word 0x7FFFEFFC
 	local_arquivo: .asciiz "/home/nathizofoli/Documentos/workspace/T1-org/trabalho_01-2024_1.bin"
 	descritor_arquivo: .word 0
-# Máscaras para decodificar a instrução
-	#campo_rd:
-	#campo_rs:
-	#campo_rt:
-	#campo_imm:
+	
+# Mapa Campos da Instrução
+ # INSTRUÇÕES R
+ # $s0 = campo OPCODE
+ # $s1 = campo funct
+ # $s2 = campo shamt
+ # $s3 = campo rd
+ # $s4 = campo rt
+ # $s5 = campo rs
+ 
+ # INSTRUÇÕES I
+ # $s0 = campo OPCODE
+ # $s1 = campo Immediate
+ # $s4 = campo rt
+ # $s5 = campo rs
+
+ # INSTRUÇÕES J
+ # $s0 = campo OPCODE
+ # $s1 = campo Address

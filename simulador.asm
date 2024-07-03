@@ -163,8 +163,7 @@ instrucaoI:
 	sll $t0, $s3, 11 			## desloca campo rd 11 bits para esquerda
 	sll $t1, $s2, 6  			## desloca campo shamt 6 bits para esquerda
 	add $t2, $t1, $t0 			## soma shamt+rd				
-	add $t2, $t2, $s1			## soma shamt+rd+funct
-	sw  $t2, 0($s1) 	  		## $s1 -> immediate
+	add $s1, $t2, $s1			## soma shamt+rd+funct
 	jr	$ra
 	
 instrucaoJ:
@@ -180,8 +179,15 @@ instrucaoJ:
 
 executaInstrucao:
 
-	beqz    $s0,    comparaFunct
-	
+	beqz    $s0,       comparaFunct
+	beq	$s0, 8,    instADDI
+	beq	$s0, 9,    instADDIU
+	beq	$s0, 0x1c, instMUL
+	beq	$s0, 5,    instBNE
+	beq	$s0, 2,    instJ
+	beq	$s0, 3,    instJAL
+	beq	$s0, 0x23,  instLW
+	beq	$s0, 0x2b,  instSW
 	
 comparaFunct:
 	beq $s1, 0xc,  instSYS

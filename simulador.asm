@@ -188,12 +188,15 @@ executaInstrucao:
 	beq	$s0, 3,    instJAL
 	beq	$s0, 0x23,  instLW
 	beq	$s0, 0x2b,  instSW
+	beq	$s0, 0xf,   instLUI
+	beq	$s0, 0xd,  instORI
 	
 comparaFunct:
 	beq $s1, 0xc,  instSYS
 	beq $s1, 0x08, instJR
 	beq $s1, 0x20, instADD
 	beq $s1, 0x21, instADDU
+	beq $s1, 0xb   instMOVE
 	
 ## add
 instADD: 
@@ -286,15 +289,28 @@ instLW:
 	lw  $t1, 0($t3)
 	jr	$ra
 
-instLA:
+## lui
+instLUI:
 	la $t0, regs      			 ## endereço inicial dos registradores
     	sll $t1, $s5, 2    			## $t1 -> valor do campo rt * 4
     	add $t2, $t1, $t0  			# $t2 -> Endereço base + rt 
-    	sll $t1, $s4, 2    			## $t1 -> valor do campo rs * 4
-    	add $t1, $t1, $t0  			## Endereço base + rs
-    	sw $t1, 0($t2)    			 # Armazena endereço em $t2
+    	andi $t3, $s1, 0x00FF			# $t3 -> 8 bits menos significativos de imm
+    	sw $t3, 0($t2)				# Armazena no endereço efetivo do registrador rt
     	jr	$ra
     	
+ ## ori  	
+instORI:
+	la $t0, regs      			 ## endereço inicial dos registradores
+    	sll $t1, $s5, 2    			## $t1 -> valor do campo rs * 4
+    	add $t2, $t1, $t0  			# $t2 -> Endereço base + rs
+    	lw $t3, 0($t2)				## $t3 -> Valor armazenado em rs 
+    	or $t4, $t3, $s1			## $t4 -> or = rs e imm
+    	sll $t1, $s4, 2    			## $t1 -> valor do campo rt * 4
+    	add $t1, $t1, $t0  			## Endereço base + rt
+    	sw $t3, 0($t1)    			 # Armazena resultado de or no endereço efetivo de rt
+    	jr	$ra
+    	
+## move
 instMOVE:
 	la $t0, regs
     	sll $t1, $s5, 2    			## $t1 -> valor do campo rt * 4
@@ -305,6 +321,7 @@ instMOVE:
     	sw $t5, 0($t3)     			## Armazena o valor de rt em rs
     	jr	$ra
 
+## bne
 instBNE:
 	la  $t0, regs
 	sll $t1, $s5, 2      			## $t1 -> valor do campo rt * 4
@@ -324,7 +341,8 @@ instBNE:
     	
 fimBNE:
 	jr	$ra
-	
+
+## mul	
 instMUL:
 	la  $t0, regs
 	sll $t1, $s5, 2     			 ## $t1 -> valor do campo rt * 4
@@ -347,7 +365,8 @@ instMUL:
     	sw	$t2, 0($t3)  			# Insere $t2 no endereço de lo
     	
     	jr	$ra
-	
+
+## j	
 instJ:
 	lw	$t0, 0($s1)			# $t0 -> address (26 bits) 
     	la	$t1, PC				# $t1 -> endereço de PC 
@@ -358,6 +377,7 @@ instJ:
     	
     	jr $ra
     	
+## jal   	
 instJAL:
 	la $t0, regs				 ## endereço inicial dos registradores
 	lw $t1, PC				 ## endereço armazenado em PC
@@ -365,12 +385,14 @@ instJAL:
 	
 	j instJ
 
+## jr
 instJR:
 	la $t0, regs				 ## endereço inicial dos registradores
 	lw $t1, 124($t0)			 ## endereço armazenado em $ra
 	la $t2, PC				 ## endereço armazenado em PC
 	sw $t1, 0($t2)				 ## armazena em PC endereço armazenado em $ra 
-	
+
+## syscall	
 instSYS:
 	la $t0, regs				 ## endereço inicial dos registradores
 	lw $t1, 8($t0)				 ## $t1 -> valor armazenado no regs $v0
